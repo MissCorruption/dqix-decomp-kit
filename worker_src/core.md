@@ -1099,6 +1099,11 @@ equal path. Same address: a constant already live in a register changes how a NE
 is materialised — with `int missing = 1;` in scope above the bind, `-1` came out as `sub r1, r3, #2`
 instead of `mvn r3, #0`. If a materialisation is one instruction off, look at what is live, not at
 the expression.
+`02177dd4` — mwcc builds a constant that does not fit one instruction as add/sub from the constant
+assigned most recently in source order, when the difference fits. Assignment order picks each base and
+the block schedule: `group` before `hdr` gave `-0x11e` as `hdr - 0x1c4`; in the 0x77 arm, idA (pool),
+key, group, hdr (= group + 0x108), idB, idC..idE (from idB), pageId, pageCountId (= pageId + 1) took
+UNDERGEN 4 to MATCH. Reorder the constant assignments before touching the expressions.
 
 When the target RE-COMPUTES register arithmetic you keep in a callee-saved register (`lsl r0, r6, #2`
 again after a call, while ours holds `j*4` in `sl` from the top of the loop): change the TYPE of the
